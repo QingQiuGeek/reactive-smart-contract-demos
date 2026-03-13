@@ -1,0 +1,165 @@
+{
+	"compiler": {
+		"version": "0.8.30+commit.73712a01"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_callback_sender",
+						"type": "address"
+					}
+				],
+				"stateMutability": "payable",
+				"type": "constructor"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "origin",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "reactive_sender",
+						"type": "address"
+					}
+				],
+				"name": "CallbackReceived",
+				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					}
+				],
+				"name": "callback",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "coverDebt",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "pay",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"stateMutability": "payable",
+				"type": "receive"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {
+				"pay(uint256)": {
+					"details": "Make sure to check the msg.sender.",
+					"params": {
+						"amount": "Amount owed due to reactive transactions and/or callbacks."
+					}
+				}
+			},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {
+				"coverDebt()": {
+					"notice": "Automatically cover the outstanding debt to the system contract or callback proxy, provided the contract has sufficient funds."
+				},
+				"pay(uint256)": {
+					"notice": "Method called by the system contract and/or proxies when payment is due."
+				}
+			},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"src/demos/basic/BasicDemoL1Callback.sol": "BasicDemoL1Callback"
+		},
+		"evmVersion": "prague",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"lib/reactive-lib/src/abstract-base/AbstractCallback.sol": {
+			"keccak256": "0xc9757de8c731b6cc38ffb3fa131ca433ac43eda84d20752a2088c7f0f211e539",
+			"license": "UNLICENSED",
+			"urls": [
+				"bzz-raw://23da9f2d5e5e2226bb88fbd224e2fe5970158dcbe5143938e19d63d29f50283a",
+				"dweb:/ipfs/QmcUKsG5B4RVJseqNsXMMfn7K8ahGnsXwhs9FQqiwbXrMt"
+			]
+		},
+		"lib/reactive-lib/src/abstract-base/AbstractPayer.sol": {
+			"keccak256": "0x3b6c31cd827f8ef34765f9a94ef9688e3448e6cd8deef6dfad43c995c3286bfd",
+			"license": "UNLICENSED",
+			"urls": [
+				"bzz-raw://e391bc27b6ac401bd7d6e4bde44eac9709dc46272d42bcb9ace7e569560bd82f",
+				"dweb:/ipfs/QmNVQQrDqme1qSHqx7ewyfzzv8NYNTVKmRqciF6j259JTW"
+			]
+		},
+		"lib/reactive-lib/src/interfaces/IPayable.sol": {
+			"keccak256": "0xd145eb370605847872b580a44968e98121102b373d64541bd519a4545e0b662d",
+			"license": "UNLICENSED",
+			"urls": [
+				"bzz-raw://e290121317922fdef7cbe7d03c11184cabe80e4dd78a1c5465255410a791774c",
+				"dweb:/ipfs/QmeesasZn33ZC1uNFDVjebiBcsyg6fy91CigsuUnR7mbdV"
+			]
+		},
+		"lib/reactive-lib/src/interfaces/IPayer.sol": {
+			"keccak256": "0xdd513b719e61a40bcb65f1729e5762582383ca772209010171f6c166422e48dd",
+			"license": "UNLICENSED",
+			"urls": [
+				"bzz-raw://f5e9702f5d75c7a7bc027cb91853cf97a2f0abe2910e9bbe15c6ae5a94bbc439",
+				"dweb:/ipfs/QmZdj8snbK7jMWFgCNAmBoJuyLs64ePKEySeAvF5xS2BNo"
+			]
+		},
+		"src/demos/basic/BasicDemoL1Callback.sol": {
+			"keccak256": "0x85511a9b35d671dc7829a44798c03e0dfebb23f0a46a2c9ad3f877c323e794ba",
+			"license": "GPL-2.0-or-later",
+			"urls": [
+				"bzz-raw://5f36635ccd83f77ef6ebc27011dbd3fb85bde869d7f150e79bb62ca37cba26bb",
+				"dweb:/ipfs/QmS2GcEW2jrqd8Qadd2Ua4LSXfmkjU9Sx8mg9797j3XnhL"
+			]
+		}
+	},
+	"version": 1
+}

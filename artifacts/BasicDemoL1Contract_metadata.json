@@ -1,0 +1,75 @@
+{
+	"compiler": {
+		"version": "0.8.30+commit.73712a01"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "origin",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "value",
+						"type": "uint256"
+					}
+				],
+				"name": "Received",
+				"type": "event"
+			},
+			{
+				"stateMutability": "payable",
+				"type": "receive"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"src/demos/basic/BasicDemoL1Contract.sol": "BasicDemoL1Contract"
+		},
+		"evmVersion": "prague",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"src/demos/basic/BasicDemoL1Contract.sol": {
+			"keccak256": "0xe8a10fa1ab5202ec81ce3931cd4e865813320b4f371a33e8659dad35da74d844",
+			"license": "GPL-2.0-or-later",
+			"urls": [
+				"bzz-raw://a1730d97bbf9bb02d9d24e42737a33e9166be5dd99877449740a6bce8e095577",
+				"dweb:/ipfs/QmcwkJDbsBcMFstbgXUjLVukPrrFw7vik6QNvHvKHfDp5z"
+			]
+		}
+	},
+	"version": 1
+}
