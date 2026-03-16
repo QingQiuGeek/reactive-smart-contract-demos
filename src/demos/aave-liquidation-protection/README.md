@@ -1,3 +1,5 @@
+> 该demo作用：利用 Reactive Smart Contracts 实现了“无人值守”的保护，当你在 Aave 上的借贷仓位面临危险（健康因子过低）时，系统会自动帮你补足抵押品，防止你的资产被清算。
+
 # Aave Liquidation Protection Demo
 
 ## Overview
@@ -28,15 +30,15 @@ The demo showcases essential liquidation protection functionality but can be imp
 
 Before proceeding further, configure these environment variables:
 
-* `DESTINATION_RPC` — RPC URL for the destination chain (Ethereum Sepolia), (see [Chainlist](https://chainlist.org)).
-* `DESTINATION_PRIVATE_KEY` — Private key for signing transactions on the destination chain.
-* `REACTIVE_RPC` — RPC URL for the Reactive Network (see [Reactive Docs](https://dev.reactive.network/reactive-mainnet)).
-* `REACTIVE_PRIVATE_KEY` — Private key for signing transactions on the Reactive Network.
-* `DESTINATION_CALLBACK_PROXY_ADDR` — The service address on the destination chain (see [Reactive Docs](https://dev.reactive.network/origins-and-destinations#callback-proxy-address)).
-* `OWNER_WALLET` — The wallet address that will own and manage the protection system.
-* `AAVE_LENDING_POOL` — Aave V3 Lending Pool address on Sepolia: `0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951`
-* `AAVE_PROTOCOL_DATA_PROVIDER` — Aave V3 Protocol Data Provider on Sepolia: `0x3e9708d80f7B3e43118013075F7e95CE3AB31F31`
-* `AAVE_ADDRESSES_PROVIDER` — Aave V3 Pool Addresses Provider on Sepolia: `0x012bAC54348C0E635dCAc9D5FB99f06F24136C9A`
+- `DESTINATION_RPC` — RPC URL for the destination chain (Ethereum Sepolia), (see [Chainlist](https://chainlist.org)).
+- `DESTINATION_PRIVATE_KEY` — Private key for signing transactions on the destination chain.
+- `REACTIVE_RPC` — RPC URL for the Reactive Network (see [Reactive Docs](https://dev.reactive.network/reactive-mainnet)).
+- `REACTIVE_PRIVATE_KEY` — Private key for signing transactions on the Reactive Network.
+- `DESTINATION_CALLBACK_PROXY_ADDR` — The service address on the destination chain (see [Reactive Docs](https://dev.reactive.network/origins-and-destinations#callback-proxy-address)).
+- `OWNER_WALLET` — The wallet address that will own and manage the protection system.
+- `AAVE_LENDING_POOL` — Aave V3 Lending Pool address on Sepolia: `0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951`
+- `AAVE_PROTOCOL_DATA_PROVIDER` — Aave V3 Protocol Data Provider on Sepolia: `0x3e9708d80f7B3e43118013075F7e95CE3AB31F31`
+- `AAVE_ADDRESSES_PROVIDER` — Aave V3 Pool Addresses Provider on Sepolia: `0x012bAC54348C0E635dCAc9D5FB99f06F24136C9A`
 
 > ℹ️ **Reactive Faucet on Sepolia**
 >
@@ -45,7 +47,7 @@ Before proceeding further, configure these environment variables:
 > **Important**: Do not send more than 5 SepETH per request, as doing so will cause you to lose the excess amount without receiving any additional REACT. The maximum that should be sent in a single transaction is 5 SepETH, which will yield 500 REACT.
 
 > ⚠️ **Broadcast Error**
-> 
+>
 > If you see the following message: `error: unexpected argument '--broadcast' found`, it means your Foundry version (or local setup) does not support the `--broadcast` flag for `forge create`. Simply remove `--broadcast` from your command and re-run it.
 
 ### Step 1 — Aave Test Tokens
@@ -56,9 +58,9 @@ Visit the [Aave V3 Testnet Faucet](https://staging.aave.com/faucet/) and request
 
 **Supported Assets on Aave V3 Sepolia:**
 
-| Symbol | Address |
-|--------|---------|
-| **DAI** | `0xFF34B3d4Aee8ddCd6F9AfffB6Fe49bD371b8a357` |
+| Symbol   | Address                                      |
+| -------- | -------------------------------------------- |
+| **DAI**  | `0xFF34B3d4Aee8ddCd6F9AfffB6Fe49bD371b8a357` |
 | **LINK** | `0xf8Fb3713D459D7C1018BD0A49D19b4C44290EBE5` |
 | **USDC** | `0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8` |
 | **WBTC** | `0x29f2D40B0605204364af54EC677bD022da425d03` |
@@ -66,7 +68,7 @@ Visit the [Aave V3 Testnet Faucet](https://staging.aave.com/faucet/) and request
 | **USDT** | `0xaA8E23Fb1079EA71e0a56f48a2aA51851D8433D0` |
 | **AAVE** | `0x88541670E55cC00bEefd87EB59EDd1b7C511AC9A` |
 | **EURS** | `0x6d906e526a4e2Ca02097BA9d0caA3c382f52278E` |
-| **GHO** | `0xc4bF5CbDaBE595361438F8c6a187bDC330539c60` |
+| **GHO**  | `0xc4bF5CbDaBE595361438F8c6a187bDC330539c60` |
 
 Example usage:
 
@@ -123,10 +125,11 @@ forge create --broadcast --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE
 
 > 📝 **Note**  
 > The CRON topic determines how frequently the reactive contract checks your position. Common intervals:
+>
 > - 1 minute: Use the system CRON_1 topic
 > - 5 minutes: Use the system CRON_5 topic
 > - 15 minutes: Use the system CRON_15 topic
-> 
+>
 > Check the [Reactive Network Documentation](https://dev.reactive.network) for available CRON topics.
 
 ### Step 5 — Create Protection Configuration
@@ -276,10 +279,13 @@ CRON Event → Reactive Contract → Callback on Sepolia → Check Health Factor
 ## Protection Types
 
 ### Collateral Deposit (Type 0)
+
 Deposits additional collateral to increase health factor. Best when you have available collateral assets and want to maintain your debt position.
 
 ### Debt Repayment (Type 1)
+
 Repays part of your debt to increase health factor. Best when you want to reduce your debt exposure.
 
 ### Both (Type 2)
+
 Attempts both methods based on preference. Provides maximum flexibility by trying the preferred method first and falling back to the alternative if needed.

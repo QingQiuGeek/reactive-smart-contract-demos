@@ -6,10 +6,12 @@ import "../../../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "../../../lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./RescuableBase.sol";
 
+// 获取代币的小数位数。
 interface IERC20Detailed is IERC20 {
     function decimals() external view returns (uint8);
 }
 
+// Aave 的主借贷池接口，管理存款、借款、还款、查询用户整体头寸等。
 interface ILendingPool {
     function getUserAccountData(address user)
         external
@@ -23,12 +25,17 @@ interface ILendingPool {
             uint256 healthFactor
         );
 
+    // 存入资产作为抵押
     function supply(address asset, uint256 amount, address onBehalfOf, uint16 referralCode) external;
 
+    // 查询用户整体头寸（总抵押、总负债、健康因子等）
     function repay(address asset, uint256 amount, uint256 rateMode, address onBehalfOf) external returns (uint256);
 }
 
+// Aave 的数据查询接口，提供更细粒度的资产和用户信息
 interface IProtocolDataProvider {
+
+    // 查询某资产的参数（如 decimals、LTV、清算阈值等）
     function getReserveConfigurationData(address asset)
         external
         view
@@ -45,6 +52,7 @@ interface IProtocolDataProvider {
             bool isFrozen
         );
 
+    // 查询某用户在某资产上的详细数据（如 aToken 余额、债务、授权等）
     function getUserReserveData(address asset, address user)
         external
         view
@@ -61,14 +69,21 @@ interface IProtocolDataProvider {
         );
 }
 
+// Aave 的价格预言机接口，用于获取资产的链上价格
 interface IPriceOracleGetter {
     function getAssetPrice(address asset) external view returns (uint256);
     function getAssetsPrices(address[] calldata assets) external view returns (uint256[] memory);
 }
 
+// Aave 的地址管理器，负责提供 LendingPool、价格预言机等核心合约的地址。
 interface ILendingPoolAddressesProvider {
     function getPriceOracle() external view returns (address);
 }
+
+/**
+ * 上述四个接口共同支撑了 Aave 的资产管理、数据查询、价格获取和合约寻址，是自动化 DeFi 操作的基础
+ *
+ */
 
 /**
  * @title PersonalAaveProtectionCallback
@@ -92,7 +107,8 @@ contract AaveProtectionDemoCallback is AbstractCallback, RescuableBase {
         Cancelled
     }
 
-    // Protection configuration struct
+    // rotectionConfig 结构体：记录每个保护任务的参数，
+    // 包括ProtectionType、健康因子阈值、ProtectionStatus、抵押资产、债务资产、状态等。
     struct ProtectionConfig {
         uint256 id;
         ProtectionType protectionType;
@@ -141,7 +157,7 @@ contract AaveProtectionDemoCallback is AbstractCallback, RescuableBase {
     error InsufficientBalanceOrAllowance(uint256 configId);
     error ProtectionExecutionFailed(uint256 configId);
 
-    // State variables
+    // State variables immutable只能在构造函数赋值，之后不可更改，但不是constant
     address public immutable owner;
     address public immutable lendingPool;
     address public immutable protocolDataProvider;
@@ -188,6 +204,7 @@ contract AaveProtectionDemoCallback is AbstractCallback, RescuableBase {
      * @param _collateralAsset Asset to use for collateral deposits
      * @param _debtAsset Asset to use for debt repayment
      * @param _preferDebtRepayment If BOTH type, which method to prefer
+     * 合约 owner 可创建新的ProtectionConfig，支持多种资产和策略。
      */
     function createProtectionConfig(
         ProtectionType _protectionType,
@@ -236,6 +253,7 @@ contract AaveProtectionDemoCallback is AbstractCallback, RescuableBase {
     /**
      * @notice Checks and protects all active configs (called by RSC via CRON)
      * @dev This is the main entry point from the reactive contract
+     * 由 Reactive Network 定时回调（如 CRON 事件），遍历所有激活的保护配置，逐一检查 owner 的健康因子。
      */
     function checkAndProtectPositions(
         address /*sender*/
@@ -254,7 +272,9 @@ contract AaveProtectionDemoCallback is AbstractCallback, RescuableBase {
             }
 
             totalConfigsChecked++;
-
+            
+            /*  _checkAndProtectConfig 返回 true 表示本次检查确实执行了保护操作（如补仓/还款），false 表示无需保护或保护失败。
+                如果 wasProtected 为 true，就 protectionsExecuted++，统计本轮实际执行了多少次保护。*/
             try this._checkAndProtectConfig(i) returns (bool wasProtected) {
                 if (wasProtected) {
                     protectionsExecuted++;
@@ -269,6 +289,7 @@ contract AaveProtectionDemoCallback is AbstractCallback, RescuableBase {
 
     /**
      * @notice Internal function to check and protect a single config
+     * 内部函数，判断是否需要保护（如健康因子低于阈值），并自动执行补仓或还款操作，最多尝试 3 次，失败则自动取消该配置。
      */
     function _checkAndProtectConfig(uint256 configId) external returns (bool) {
         require(msg.sender == address(this), "Internal function");
@@ -330,6 +351,7 @@ contract AaveProtectionDemoCallback is AbstractCallback, RescuableBase {
     /**
      * @notice Cancels a protection configuration
      * @param configId The ID of the config to cancel
+     * 取消ProtectionConfig
      */
     function cancelProtectionConfig(uint256 configId) external onlyOwner validConfig(configId) {
         ProtectionConfig storage config = protectionConfigs[configId];
@@ -344,6 +366,7 @@ contract AaveProtectionDemoCallback is AbstractCallback, RescuableBase {
     /**
      * @notice Pauses a protection configuration
      * @param configId The ID of the config to pause
+     * 暂停ProtectionConfig
      */
     function pauseProtectionConfig(uint256 configId) external onlyOwner validConfig(configId) {
         ProtectionConfig storage config = protectionConfigs[configId];
@@ -356,6 +379,7 @@ contract AaveProtectionDemoCallback is AbstractCallback, RescuableBase {
     /**
      * @notice Resumes a paused protection configuration
      * @param configId The ID of the config to resume
+     * 恢复ProtectionConfig
      */
     function resumeProtectionConfig(uint256 configId) external onlyOwner validConfig(configId) {
         ProtectionConfig storage config = protectionConfigs[configId];
@@ -368,6 +392,7 @@ contract AaveProtectionDemoCallback is AbstractCallback, RescuableBase {
     /**
      * @notice Gets all config IDs
      * @return Array of all config IDs
+     * 获取所有配置
      */
     function getAllConfigs() external view returns (uint256[] memory) {
         uint256[] memory allConfigIds = new uint256[](protectionConfigs.length);
@@ -380,6 +405,7 @@ contract AaveProtectionDemoCallback is AbstractCallback, RescuableBase {
     /**
      * @notice Gets active config IDs
      * @return Array of active config IDs
+     * 获取所有激活的配置
      */
     function getActiveConfigs() external view returns (uint256[] memory) {
         uint256 activeCount = 0;
@@ -407,6 +433,9 @@ contract AaveProtectionDemoCallback is AbstractCallback, RescuableBase {
 
     /**
      * @notice Execute collateral protection
+     * 自动补仓 执行函数，如果补仓成功（返回值 > 0），会 emit ProtectionExecuted 事件，记录补仓细节（资产、数量、健康因子变化等）。
+如果失败，emit ProtectionCheckFailed 事件，记录失败原因。
+     * 
      */
     function _executeCollateralProtection(uint256 configId, uint256 currentHealthFactor) internal returns (bool) {
         try this._performCollateralProtection(configId) returns (uint256 collateralAdded) {
@@ -436,6 +465,7 @@ contract AaveProtectionDemoCallback is AbstractCallback, RescuableBase {
 
     /**
      * @notice Execute debt repayment protection
+     * 执行抵押偿还
      */
     function _executeDebtRepayment(uint256 configId, uint256 currentHealthFactor) internal returns (bool) {
         try this._performDebtRepayment(configId) returns (uint256 repaymentAmount) {
@@ -631,6 +661,7 @@ contract AaveProtectionDemoCallback is AbstractCallback, RescuableBase {
      */
     function _getAssetPrice(address asset) internal view returns (uint256) {
         address priceOracleAddress = ILendingPoolAddressesProvider(addressesProvider).getPriceOracle();
+        // 把 priceOracleAddress 这个地址“当作” IPriceOracleGetter 接口来用，这样就可以在这地址上调用接口里声明的函数（如 getAssetPrice）
         return IPriceOracleGetter(priceOracleAddress).getAssetPrice(asset);
     }
 

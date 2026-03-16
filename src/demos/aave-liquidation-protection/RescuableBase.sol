@@ -7,6 +7,8 @@ import "../../../lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC2
 /**
  * @title RescuableBase
  * @notice Abstract contract providing rescue functionality for ETH and ERC20 tokens
+ 
+ 合约资产救援抽象基类，用于安全取回合约内的 ETH 和 ERC20 代币，防止资产卡死。常被业务合约继承
  */
 abstract contract RescuableBase {
     using SafeERC20 for IERC20;
@@ -22,6 +24,8 @@ abstract contract RescuableBase {
     /**
      * @notice Internal function to rescue ETH
      * @param amount Amount to rescue (0 for full balance)
+     * 
+     * 转出指定数量（或全部）ETH 到 _rescueRecipient() 返回的地址
      */
     function _rescueETH(uint256 amount) internal {
         uint256 balance = address(this).balance;
@@ -40,6 +44,8 @@ abstract contract RescuableBase {
      * @notice Internal function to rescue ERC20 tokens
      * @param token Token address to rescue
      * @param amount Amount to rescue (0 for full balance)
+     * 
+     * 转出指定数量（或全部）ERC20 到 _rescueRecipient() 返回的地址。
      */
     function _rescueERC20(address token, uint256 amount) internal {
         uint256 balance = IERC20(token).balanceOf(address(this));

@@ -10,6 +10,8 @@ import "../../../lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC2
  * @title PersonalAaveProtectionReactive
  * @notice Personal reactive smart contract for monitoring Aave liquidation protection
  * @dev Each user deploys their own instance paired with PersonalAaveProtectionCallback
+ * 
+ * 部署在 Reactive Network 上的自动化监控合约，用于定时监控 Aave 清算保护配置，并驱动回调合约自动执行保护。
  */
 contract AaveProtectionDemoReactive is IReactive, AbstractPausableReactive {
     // Events
@@ -172,6 +174,7 @@ contract AaveProtectionDemoReactive is IReactive, AbstractPausableReactive {
     }
 
     // Process protection lifecycle events
+    // 根据事件 topic_0，分发处理不同类型的保护生命周期事件。
     function _processProtectionEvent(LogRecord calldata log) internal {
         if (log.topic_0 == PROTECTION_CONFIGURED_TOPIC_0) {
             _processConfigCreated(log);
@@ -187,6 +190,7 @@ contract AaveProtectionDemoReactive is IReactive, AbstractPausableReactive {
     }
 
     // Process config creation
+    // 创造配置
     function _processConfigCreated(LogRecord calldata log) internal {
         // Extract data from event topics
         uint256 configId = uint256(log.topic_1);
@@ -210,6 +214,7 @@ contract AaveProtectionDemoReactive is IReactive, AbstractPausableReactive {
     }
 
     // Process config cancellation
+    // 取消配置，将对应 configId 的 trackedConfigs 状态设为 Cancelled，并 emit ConfigUntracked。
     function _processConfigCancelled(LogRecord calldata log) internal {
         uint256 configId = uint256(log.topic_1);
 
@@ -220,6 +225,7 @@ contract AaveProtectionDemoReactive is IReactive, AbstractPausableReactive {
     }
 
     // Process config execution
+    // 处理 ProtectionExecuted 事件（即保护操作已执行）。
     function _processConfigExecuted(LogRecord calldata log) internal {
         uint256 configId = uint256(log.topic_1);
 
@@ -231,6 +237,7 @@ contract AaveProtectionDemoReactive is IReactive, AbstractPausableReactive {
     }
 
     // Process config pause
+    // 处理 ProtectionPaused 事件（即暂停保护配置）
     function _processConfigPaused(LogRecord calldata log) internal {
         uint256 configId = uint256(log.topic_1);
 
@@ -240,6 +247,7 @@ contract AaveProtectionDemoReactive is IReactive, AbstractPausableReactive {
     }
 
     // Process config resume
+    // 处理 ProtectionResumed 事件（即恢复保护配置）。
     function _processConfigResumed(LogRecord calldata log) internal {
         uint256 configId = uint256(log.topic_1);
 
