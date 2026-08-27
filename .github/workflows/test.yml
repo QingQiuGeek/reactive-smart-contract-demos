@@ -1,3 +1,6 @@
+on:
+  workflow_dispatch:
+
 name: test
 
 on: workflow_dispatch
